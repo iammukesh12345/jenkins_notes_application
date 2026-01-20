@@ -1,6 +1,6 @@
 @Library('Shared')_
 pipeline{
-    agent { label 'dev-server'}
+    agent { label 'mukseh_1'}
     
     stages{
         stage("Code clone"){
