@@ -53,9 +53,8 @@ pipeline {
         }
         stage("Deploy Docker Container") {
             steps {
-                echo "Stopping and removing old container if exists..."
                 script{
-                    deploy("notes-app:latest","notes-app","8000:8000")
+                    deploy("mrthakre/notes-app:latest","notes-app","8000:8000")
                 }
             }
         }
