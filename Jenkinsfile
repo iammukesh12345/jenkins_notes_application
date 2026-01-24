@@ -1,12 +1,21 @@
+@Library("shared") _
+
 pipeline {
     agent { label "magent_1" }
     stages {
+        stage("Hello"){
+            steps {
+                script{
+                    hello()
+                }
+            }
+        }
         stage("Clone Code") {
             steps {
                 cleanWs()
-                echo "Cloning repository..."
-                git url: "https://github.com/iammukesh12345/jenkins_notes_application.git", branch: "main"
-                echo "Code cloning success"
+                script{
+                    clone("https://github.com/iammukesh12345/jenkins_notes_application.git","main")
+                }
             }
         }
          stage("Workspace Optimization") {
@@ -20,21 +29,17 @@ pipeline {
         }
         stage("Build Docker Image") {
             steps {
-                echo "Building Docker image..."
-                sh "docker build -t notes-app:latest ."
+                script{
+                    build("notes-app","latest","mrthakre")
+                }
+               
             }
         }
         stage("PUSH IMAGE") {
             steps {
-                echo "Pushing docker image on Docker hub"
-                withCredentials([usernamePassword('credentialsId':"dockerhub_cred",
-                                                   passwordVariable:"dockerHubPass",
-                                                   usernameVariable:"dockerHubUser")])
-                {
-                    sh "docker login -u ${env.dockerHubUser} -p ${env.dockerHubPass}"
-                    sh "docker image tag notes-app:latest ${env.dockerHubUser}/notes-app:latest"
-                    sh "docker push ${env.dockerHubUser}/notes-app:latest"
-                }
+              script{
+                  push("notes-app","latest","mrthakre")
+              }
             }
         }
         
@@ -49,10 +54,9 @@ pipeline {
         stage("Deploy Docker Container") {
             steps {
                 echo "Stopping and removing old container if exists..."
-                sh '''
-                    docker rm -f notes-app || true
-                    docker run -d --name notes-app -p 8000:8000 notes-app:latest
-                '''
+                script{
+                    deploy("notes-app:latest","notes-app","8000:8000")
+                }
             }
         }
          stage("Health Check") {
